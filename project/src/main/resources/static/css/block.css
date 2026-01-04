@@ -1,56 +1,58 @@
-.page-title{
+.page-title {
     margin: 0 0 10px;
     font-size: 20px;
     letter-spacing: -.2px;
 }
-.page-desc{
+.page-desc {
     margin: 0 0 18px;
     color: var(--muted);
     line-height: 1.7;
 }
 
-.section{
+.section {
     border: 1px solid var(--line);
     background: rgba(255,255,255,.60);
     border-radius: 14px;
     padding: 16px;
     margin-top: 14px;
 }
-.section h2{
+.section h2 {
     margin: 0 0 8px;
     font-size: 16px;
 }
-.section .hint{
+.section .hint {
     margin: 0 0 12px;
     color: var(--muted);
     font-size: 13px;
     line-height: 1.6;
 }
 
-/* 고정 확장자 체크박스 */
 .fixed-grid{
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 10px 14px;
 }
-@media (max-width: 720px){
-    .fixed-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@media (max-width: 720px) {
+    .fixed-grid { 
+        grid-template-columns: repeat(2, minmax(0, 1fr)); 
+    }
 }
 
-.chk{
-    display:flex;
-    align-items:center;
-    gap:10px;
+.chk {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid rgba(16,24,40,.10);
     background: rgba(255,255,255,.70);
 }
-.chk input{
+.chk input {
     width: 16px;
     height: 16px;
 }
-.chk code{
+.chk code {
     font-weight: 800;
     letter-spacing: .3px;
     background: rgba(98,142,255,.10);
@@ -59,15 +61,14 @@
     border-radius: 999px;
 }
 
-/* 커스텀 입력 */
-.custom-row{
-    display:flex;
-    align-items:center;
+.custom-row {
+    display: flex;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
     margin-top: 6px;
 }
-.custom-row input{
+.custom-row input {
     height: 40px;
     padding: 0 12px;
     border-radius: 12px;
@@ -78,27 +79,27 @@
     min-width: 220px;
     flex: 1 1 220px;
 }
-.custom-row input:focus{
+.custom-row input:focus {
     border-color: rgba(98,142,255,.45);
     box-shadow: 0 0 0 3px rgba(98,142,255,.14);
 }
 
-.custom-count{
+.custom-count {
   margin-top: 10px;
   margin-bottom: 6px;
   font-size: 12px;
   color: var(--muted);
 }
 
-.btn.small{
+.btn.small {
     padding: 10px 14px;
     height: 40px;
     border-radius: 12px;
 }
 
-.badge-area{
+.badge-area {
     margin-top: 12px;
-    display:flex;
+    display: flex;
     flex-wrap: wrap;
     gap: 10px;
     min-height: 44px;
@@ -107,15 +108,15 @@
     border: 1px dashed rgba(16,24,40,.16);
     background: rgba(255,255,255,.55);
 }
-.badge-empty{
+.badge-empty {
     color: var(--muted);
     font-size: 13px;
     line-height: 1.6;
 }
 
-.badge{
-    display:inline-flex;
-    align-items:center;
+.badge {
+    display: inline-flex;
+    align-items: center;
     gap: 8px;
     padding: 8px 10px;
     border-radius: 999px;
@@ -123,27 +124,29 @@
     background: rgba(98,142,255,.10);
     font-weight: 700;
 }
-.badge .dot{
-    width: 6px; height: 6px; border-radius: 999px;
+.badge .dot {
+    width: 6px; 
+    height: 6px; 
+    border-radius: 999px;
     background: rgba(98,142,255,.75);
 }
-.badge .txt{
+.badge .txt {
     letter-spacing: .2px;
 }
-.badge .x{
+.badge .x {
     border: 0;
     background: transparent;
     cursor: pointer;
     width: 24px;
     height: 24px;
     border-radius: 999px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: rgba(16,24,40,.60);
     font-weight: 900;
 }
-.badge .x:hover{
+.badge .x:hover {
     background: rgba(16,24,40,.08);
 }
 

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default-layout}">
+<head>
+  <title layout:fragment="title">파일 업로드</title>
+
+  <th:block layout:fragment="pageCss">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/upload.css}">
+  </th:block>
+</head>
+
+<body>
+  <section layout:fragment="content">
+    <h1 class="page-title">파일 업로드</h1>
+    <p class="page-desc">
+      파일과 함께 게시글을 업로드하는 화면입니다. 실제 업로드(서버 저장)는 구현되지 않았습니다.
+    </p>
+
+    <form id="uploadForm" class="section" method="post" th:action="@{/upload}" enctype="multipart/form-data">
+      <!-- <h2>게시글 정보</h2>
+      <p class="hint">필수 항목을 입력하고 파일을 선택하세요.</p> -->
+
+      <div class="form-grid">
+        <div class="lbl">작성자</div>
+        <div>
+          <th:block th:if="${session.loginUserName == null}">
+            <input class="inp" type="text" name="writer" placeholder="작성자" autocomplete="off">
+          </th:block>
+          <th:block th:if="${session.loginUserName != null}">
+            <p th:text="|${session.loginUserName}|"></p>
+          </th:block>
+        </div>
+
+        <div class="lbl">제목</div>
+        <div><input class="inp" type="text" name="title" placeholder="제목" autocomplete="off"></div>
+
+        <div class="lbl">파일 업로드</div>
+        <div class="row">
+          <input id="fileInput" type="file" name="files" multiple>
+          <button id="clearFilesBtn" type="button" class="btn small">전체 비우기</button>
+        </div>
+
+        <div class="lbl">내용</div>
+        <div><textarea class="ta" name="content" placeholder="내용을 입력하세요"></textarea></div>
+      </div>
+
+      <div class="file-meta">
+        <div>
+          선택된 파일: <strong id="fileCount">0</strong>개 /
+          총 용량: <strong id="totalSize">0 B</strong>
+        </div>
+        <div>
+          차단 확장자에 해당하는 파일은 추가되지 않습니다.
+        </div>
+      </div>
+
+      <div class="file-list" aria-label="선택된 파일 목록">
+        <table>
+          <thead>
+          <tr>
+            <th style="width:36%">파일명</th>
+            <th style="width:12%">확장자</th>
+            <th style="width:13%">용량</th>
+            <th style="width:16%">타입</th>
+            <th style="width:19%">수정일</th>
+            <th style="width:4%"></th>
+          </tr>
+          </thead>
+          <tbody id="fileTbody">
+          <tr id="fileEmptyRow">
+            <td colspan="6" class="empty">선택된 파일이 없습니다.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;" class="row">
+        <button type="button" id="submitBtn" class="btn primary small">등록</button>
+        <a th:href="@{/}" class="btn small">취소</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- 스크립트 -->
+  <th:block layout:fragment="pageScript">
+    <script th:inline="javascript">
+      document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById("fileInput");
+        const clearBtn = document.getElementById("clearFilesBtn");
+        const tbody = document.getElementById("fileTbody");
+        const emptyRow = document.getElementById("fileEmptyRow");
+        const fileCountEl = document.getElementById("fileCount");
+        const totalSizeEl = document.getElementById("totalSize");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // 차단 확장자 목록
+        const blockedExtensions = /*[[${extensions}]]*/ [];
+        const BLOCKED_SET = new Set((blockedExtensions || []).map(v => {
+          v = String(v || "").trim().toLowerCase();
+          if (v.startsWith(".")) v = v.slice(1);
+          return v;
+        }).filter(v => v.length > 0));
+
+        // 파일 여러 개를 등록하기 위한 변수
+        let selectedFiles = [];
+
+        // 등록한 파일의 메타데이터 표시를 위한 값 추출 (확장자, 용량, 수정일 등)
+        function getExt(filename) {
+          const name = String(filename || "");
+          const idx = name.lastIndexOf(".");
+          if (idx === -1) return "";
+          return name.slice(idx + 1).trim().toLowerCase();
+        }
+
+        function formatBytes(bytes) {
+          const b = Number(bytes || 0);
+          if (b < 1024) return b + " B";
+          const kb = b / 1024;
+          if (kb < 1024) return kb.toFixed(1) + " KB";
+          const mb = kb / 1024;
+          if (mb < 1024) return mb.toFixed(1) + " MB";
+          const gb = mb / 1024;
+          return gb.toFixed(2) + " GB";
+        }
+
+        function formatDate(ms) {
+          if (!ms) return "-";
+          const d = new Date(ms);
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          const hh = String(d.getHours()).padStart(2, "0");
+          const mm = String(d.getMinutes()).padStart(2, "0");
+          return `${y}-${m}-${day} ${hh}:${mm}`;
+        }
+
+        // selectedFiles와 fileInput.files를 동기화 (input type=file보다 자유롭게 파일 관리 가능)
+        function syncInputFiles() {
+          const dt = new DataTransfer();
+          selectedFiles.forEach(f => dt.items.add(f));
+          fileInput.files = dt.files;
+        }
+
+        // 현재 selectedFiles에 있는 파일들을 목록에 반영
+        function renderList() {
+          tbody.innerHTML = "";
+          if (selectedFiles.length === 0) {
+            tbody.appendChild(emptyRow);
+            fileCountEl.textContent = "0";
+            totalSizeEl.textContent = "0 B";
+            return;
+          }
+
+          let total = 0;
+
+          selectedFiles.forEach((file, idx) => {
+            total += (file.size || 0);
+            const ext = getExt(file.name);
+            const tr = document.createElement("tr");
+
+            tr.innerHTML =
+              `<td>${file.name}</td>
+              <td><span class="pill">.${ext || "-"}</span></td>
+              <td>${formatBytes(file.size)}</td>
+              <td>${file.type || "-"}</td>
+              <td>${formatDate(file.lastModified)}</td>
+              <td>
+                <button type="button" class="xbtn" data-idx="${idx}" aria-label="삭제">×</button>
+              </td>`;
+
+            tbody.appendChild(tr);
+          });
+
+          // 파일의 개수와 총 용량 표시
+          fileCountEl.textContent = String(selectedFiles.length);
+          totalSizeEl.textContent = formatBytes(total);
+        }
+
+        function addFiles(files) {
+          if (!files || files.length === 0) return;
+
+          let blockedHit = false;
+
+          Array.from(files).forEach(file => {
+            const ext = getExt(file.name);
+
+            // 등록하려는 파일의 확장자가 차단 목록에 있다면 등록을 제한
+            if (ext && BLOCKED_SET.has(ext)) {
+              blockedHit = true;
+              return;
+            }
+
+            // 동일 파일 중복 방지 (이름,크기,수정일이 모두 같은 경우에만)
+            const dup = selectedFiles.some(f =>
+              f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
+            );
+            if (dup) return;
+
+            selectedFiles.push(file);
+          });
+
+          if (blockedHit) {
+            alert("업로드가 차단된 확장자입니다.");
+          }
+
+          syncInputFiles();
+          renderList();
+        }
+
+        // 파일 선택 시 addFiles 수행
+        $(fileInput).on("change", function () {
+          addFiles(fileInput.files);
+
+          fileInput.value = "";
+        });
+
+        // 목록에서 개별 파일 삭제
+        $(tbody).on("click", ".xbtn", function () {
+          const idx = Number(this.getAttribute("data-idx"));
+          if (Number.isNaN(idx)) return;
+
+          selectedFiles.splice(idx, 1);
+          syncInputFiles();
+          renderList();
+        });
+
+        // 목록에서 전체 파일 삭제
+        $(clearBtn).on("click", function () {
+          selectedFiles = [];
+          syncInputFiles();
+          renderList();
+        });
+
+        // 실제 등록은 구현하지 않았고, 현재 등록된 파일의 이름들만 alert
+        $(submitBtn).on("click", function () {
+          const names = selectedFiles.map(f => f.name).join("\n");
+          alert(names?"현재 등록된 파일들 : \n"+names:"등록된 파일이 없습니다.");
+        });
+
+        // 초기 렌더
+        renderList();
+      });
+    </script>
+  </th:block>
+</body>
+</html>

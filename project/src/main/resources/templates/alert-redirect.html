@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <title>alert</title>
+</head>
+<body>
+<script th:inline="javascript">
+  alert(/*[[${msg}]]*/ "관리자만 접근 가능합니다");
+  location.replace(/*[[${redirectUrl}]]*/ "/");
+</script>
+</body>
+</html>

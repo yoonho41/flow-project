@@ -4,9 +4,10 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default-layout}">
 <head>
-  <title layout:fragment="title">확장자 차단</title>
+  <title layout:fragment="title">파일 확장자 차단</title>
 
   <th:block layout:fragment="pageCss">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
     <link rel="stylesheet" th:href="@{/css/block.css}">
   </th:block>
 </head>
@@ -14,13 +15,12 @@
 <body>
   <section layout:fragment="content">
 
-    <h1 class="page-title">확장자 차단</h1>
+    <h1 class="page-title">파일 확장자 차단</h1>
     <p class="page-desc">
-      업로드 파일의 확장자를 차단하기 위한 화면입니다. 아래에서 고정 확장자 체크 및 커스텀 확장자를 등록할 수 있습니다.
-      (현재는 화면 UI만 구현된 상태입니다.)
+      업로드 파일의 확장자를 차단하기 위한 화면입니다. 아래에서 고정 확장자 check 및 커스텀 확장자를 등록할 수 있습니다.
     </p>
 
-    <!-- 1) 고정 확장자 -->
+    <!-- 고정 확장자 차단 -->
     <div class="section">
       <h2>고정 확장자</h2>
       <p class="hint">
@@ -29,6 +29,7 @@
 
       <div class="fixed-grid">
         <label class="chk">
+          <!-- 이미 차단되어 있는 고정 확장자는 checked로 표시 -->
           <input type="checkbox" name="fixedExt" value="bat"
           th:checked="${extensions != null and #lists.contains(extensions, 'bat')}">
           <p class="fixed-grid-p">.bat</p>
@@ -65,14 +66,14 @@
         </label>
       </div>
 
-      <div class="note">※ 실제 차단 적용/저장은 이후 기능 구현 단계에서 연결됩니다.</div>
+      <div class="note">※ 하단의 커스텀 확장자 추가 기능으로도 고정 확장자 차단이 가능합니다.</div>
     </div>
 
-    <!-- 2) 커스텀 확장자 -->
+    <!-- 커스텀 확장자 차단 -->
     <div class="section">
       <h2>커스텀 확장자</h2>
       <p class="hint">
-        확장자를 직접 입력해 추가할 수 있습니다. “추가” 버튼을 누르면 아래에 배지로 등록되며, X로 삭제할 수 있습니다.
+        확장자를 직접 입력해 추가할 수 있습니다. “추가” 버튼을 누르면 아래에 badge로 등록되며, X로 삭제할 수 있습니다.
       </p>
 
       <div class="custom-row">
@@ -82,7 +83,7 @@
       </div>
 
       <div class="custom-count">
-        <span id="customCount">0/10</span>
+        <span id="customCount">0/200</span>
       </div>
 
       <div id="badgeArea" class="badge-area" aria-label="등록된 커스텀 확장자 목록">
@@ -90,13 +91,13 @@
       </div>
 
       <div class="note">
-        입력 규칙(화면용): 영문/숫자만, 앞의 점(.)은 자동 제거, 중복은 추가되지 않습니다.
+        Validation : 영문/숫자만 등록 가능, 앞의 점(.)은 자동 제거 처리
       </div>
     </div>
 
   </section>
 
-  <!-- ✅ 페이지 전용 스크립트(배지만 화면에서 추가/삭제) -->
+  <!-- 스크립트 -->
   <th:block layout:fragment="pageScript">
     <script th:inline="javascript">
       document.addEventListener("DOMContentLoaded", function () {
@@ -105,33 +106,42 @@
         const badgeArea = document.getElementById("badgeArea");
         const badgeEmpty = document.getElementById("badgeEmpty");
 
-        const FIXED_SET = new Set(["bat","cmd","com","cpl","exe","scr","js"]);
+        // 고정 확장자 SET
+        const fixed_set = new Set(["bat","cmd","com","cpl","exe","scr","js"]);
 
-        const dbExtensions = /*[[${extensions}]]*/ [];
+        // 기존에 차단되어서 DB에 있던 확장자들
+        const blockedExtensions = /*[[${extensions}]]*/ [];
 
-        const CUSTOM_MAX_LEN = 20;
-        const CUSTOM_MAX_COUNT = 10;
+        const CUSTOM_MAX_LEN = 20;      // 커스텀 확장자 최대 입력 길이 
+        const CUSTOM_MAX_COUNT = 200;   // 커스텀 확장자 최대 추가 갯수
 
+        // 커스텀 확장자 추가 시 간단한 검증과 수정
         function normalizeExt(v) {
           if (!v) return "";
-          v = v.trim().toLowerCase();
-          if (v.startsWith(".")) v = v.slice(1);
+          v = v.trim().toLowerCase();             // 영어는 소문자로 변경
+          if (v.startsWith(".")) v = v.slice(1);  // 맨 앞에 점(.) 입력했을 경우 제거
 
+          // 20자 넘게 입력 불가능
           if (v.length > CUSTOM_MAX_LEN) return "";
-          // 영문/숫자만 (화면용 최소 검증)
+
+          // 정규화식으로 영어+숫자 조합만 가능하게 제한
           if (!/^[a-z0-9]+$/.test(v)) return "";
+
           return v;
         }
 
+        // 등록하려는 확장자에 해당하는 뱃지가 이미 있는지 조회. 있다면 true, 없다면 false를 return
         function isDuplicate(ext) {
           return !!badgeArea.querySelector('[data-ext="' + ext + '"]');
         }
 
+        // 뱃지 요소가 하나라도 있다면 badgeEmpty div에 none 속성 추가 (숨김처리)
         function updateEmpty() {
           const hasBadge = badgeArea.querySelector(".badge") !== null;
           badgeEmpty.style.display = hasBadge ? "none" : "block";
         }
 
+        // 등록된 커스텀 확장자의 개수
         function getCustomBadgeCount() {
           return badgeArea.querySelectorAll(".badge").length;
         }
@@ -142,24 +152,22 @@
           el.textContent = getCustomBadgeCount() + "/" + CUSTOM_MAX_COUNT;
         }
 
-        // ✅🔧 초기 로드: DB에 있는 커스텀 확장자만 배지로 등록(고정 확장자는 배지 생성 X)
+        // 페이지가 로드될 때 blockedExtensions에서 고정 확장자를 제외한 나머지 확장자를 커스텀 확장자에 뱃지로 등록
         (function renderInitialCustomBadges() {
-          (dbExtensions || []).forEach(function(v) {
+          (blockedExtensions || []).forEach(function(v) {
             const ext = normalizeExt(v);
             if (!ext) return;
-            if (FIXED_SET.has(ext)) return;
+            if (fixed_set.has(ext)) return;
             addBadge(ext);
           });
           updateEmpty();
           updateCustomCount();
         })();
 
+        // innerHTML append로 커스텀 확장자 뱃지 구성
         function addBadge(ext) {
           if (!ext || isDuplicate(ext)) return;
-
-          if (getCustomBadgeCount() >= CUSTOM_MAX_COUNT) {
-            return;
-          }
+          if (getCustomBadgeCount() >= CUSTOM_MAX_COUNT) return;
 
           const badge = document.createElement("span");
           badge.className = "badge";
@@ -175,7 +183,7 @@
           updateCustomCount();
         }
 
-        // ✅🔧 추가 버튼: (1) 고정이면 체크박스만 처리 (2) 커스텀이면 DB insert 후 배지 추가
+        // 커스텀 확장자에서 customExtAddBtn(추가 버튼) 클릭
         addBtn.addEventListener("click", function () {
           const ext = normalizeExt(input.value);
 
@@ -185,8 +193,10 @@
             return;
           }
 
-          // ✅🔧 [핵심] 커스텀에서 고정 확장자를 추가하려는 경우: 체크박스만 체크, 배지 생성 X
-          if (FIXED_SET.has(ext)) {
+          // 커스텀 확장자 입력칸에 고정 확장자에 있는 확장자를 입력 후 추가할 때 처리
+          if (fixed_set.has(ext)) {
+
+            // 해당 고정 확장자(ext)의 checkbox를 jQuery 객체로 가져오기
             const $fixedCb = $('input[name="fixedExt"][value="' + ext + '"]');
 
             if ($fixedCb.length === 0) {
@@ -194,7 +204,8 @@
             } else if ($fixedCb.is(":checked")) {
               alert("이미 고정 확장자로 등록되어 있습니다.");
             } else {
-              $fixedCb.prop("checked", true).trigger("change"); // 고정 확장자 DB 반영 로직 재사용
+              // 속성을 checked로 바꾸고, 실제로 check했을 때의 이벤트를 발생 (DB등록)
+              $fixedCb.prop("checked", true).trigger("change");
             }
 
             input.value = "";
@@ -203,26 +214,26 @@
           }
 
           if (getCustomBadgeCount() >= CUSTOM_MAX_COUNT) {
-            alert("커스텀 확장자는 최대 10개까지만 등록할 수 있습니다.");
+            alert("커스텀 확장자는 최대 200개까지만 등록할 수 있습니다.");
             input.focus();
             return;
           }
 
-          // 커스텀 중복(화면 기준) 방지
+          // 커스텀 확장자 중복 등록 방지
           if (isDuplicate(ext)) {
             alert("이미 등록된 커스텀 확장자입니다.");
             input.select();
             return;
           }
 
-          // ✅🔧 DB insert 성공 시에만 배지 생성
+          // 모든 제한사항을 통과했으므로 커스텀 확장자 등록 시작, 등록 중에는 추가버튼 비활성화
           addBtn.disabled = true;
           $.ajax({
-            url: "/api/extensions",     // ⚠️ 고정 확장자 insert에 쓰는 URL과 동일하게 맞추세요
+            url: "/api/extensions",
             method: "POST",
             data: { name: ext },
             success: function (res) {
-              // 서버가 duplicate 같은 응답을 주는 경우를 대비(선택)
+              // 스크립트에서 중복 검사를 통과했더라도 중복 여부를 서버에서 한번 더 검증
               if (typeof res === "string" && res.toLowerCase().includes("duplicate")) {
                 alert("이미 등록된 확장자입니다.");
                 return;
@@ -235,14 +246,14 @@
               else alert("확장자 등록에 실패했습니다.");
             },
             complete: function () {
-              addBtn.disabled = false;
+              addBtn.disabled = false; // 추가버튼 다시 활성화
               input.focus();
               updateEmpty();
             }
           });
         });
 
-
+        // Enter키로 추가버튼 클릭 효과 발생
         input.addEventListener("keydown", function (e) {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -250,8 +261,7 @@
           }
         });
 
-        // 이벤트 위임으로 X 클릭 처리
-        // ✅🔧 X 클릭: DB delete 성공 시에만 배지 제거
+        // 커스텀 확장자 뱃지의 X 클릭
         badgeArea.addEventListener("click", function (e) {
           const btn = e.target.closest(".x");
           if (!btn) return;
@@ -262,8 +272,8 @@
           const ext = badge.getAttribute("data-ext");
           if (!ext) return;
 
-          // (안전장치) 고정 확장자는 커스텀 배지로 생성되지 않지만 혹시 모를 경우 방지
-          if (FIXED_SET.has(ext)) {
+          // 에러 방지
+          if (fixed_set.has(ext)) {
             alert("고정 확장자는 커스텀 배지에서 삭제할 수 없습니다.");
             return;
           }
@@ -291,26 +301,22 @@
         const $fixed = $('input[name="fixedExt"]');
 
 
-        // 2) 체크/해제 시 insert/delete 호출
+        // 고정 확장자의 checkbox 클릭 시 DB insert/delete
         $fixed.on("change", function() {
-          const $cb = $(this);
+          const $cb = $(this);  // cb : checkbox
           const ext = String($cb.val()).toLowerCase();
           const checked = $cb.is(":checked");
 
-          // 중복 클릭 방지
+          // checkbox 임시 비활성화
           $cb.prop("disabled", true);
 
-          if (checked) {
+          if (checked) {  // unchecked -> checked (DB insert)
             $.ajax({
               url: "/api/extensions",
               method: "POST",
               data: { name: ext },
-              success: function(res) {
-                // res: "ok" or "duplicate"
-                // duplicate여도 체크 상태 유지
-              },
+              success: function(res) {},
               error: function() {
-                // 실패 시 원복
                 $cb.prop("checked", false);
                 alert("확장자 등록에 실패했습니다.");
               },
@@ -318,21 +324,18 @@
                 $cb.prop("disabled", false);
               }
             });
-          } else {
+          } else {  // checked -> unchecked (DB delete)
             $.ajax({
               url: "/api/extensions",
               method: "DELETE",
               data: { name: ext },
-              success: function() {
-              // ok
-              },
+              success: function() {},
               error: function() {
-              // 실패 시 원복
-              $cb.prop("checked", true);
-              alert("확장자 삭제에 실패했습니다.");
+                $cb.prop("checked", true);
+                alert("확장자 삭제에 실패했습니다.");
               },
               complete: function() {
-              $cb.prop("disabled", false);
+                $cb.prop("disabled", false);
               }
             });
           }

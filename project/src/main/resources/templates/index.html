@@ -5,16 +5,67 @@
       layout:decorate="~{layout/default-layout}">
 <head>
   <title layout:fragment="title">홈</title>
+
+  <th:block layout:fragment="pageCss">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+  </th:block> 
 </head>
 
 <body>
   <section layout:fragment="content">
-    <h1>프로젝트 개요</h1>
-    <p style="color: rgba(16,24,40,.62); line-height: 1.7; margin-top: 8px;">
-      업로드 파일의 확장자를 정책에 따라 차단하는 기능을 구현하는 과제입니다.
-      현재는 화면 레이아웃을 먼저 구성한 상태이며, 기능은 이후 단계에서 추가할 예정입니다.
+    <h1>파일 확장자 차단 과제(김윤호) : 과제 고려사항</h1>
+
+    <a class="main-subject">SpringBoot + MySQL</a>
+    <p class="main-content">
+      채용공고의 자격요건을 참고하여 최대한 연관성 있는 기술 스택으로 구성했습니다.
+    </p><br/>
+
+
+    <a class="main-subject">권한 기반 접근 제어(간단 로그인)</a>
+    <p class="main-content">
+      회원가입 기능 없이 최소한의 로그인 기능만 구현했습니다.
     </p>
-    <p th:text="${session.loginUserName}">세션 사용자명</p>
+    <p class="main-content">
+      관리자만 확장자 차단 기능에 접근할 수 있도록 권한을 분리했습니다.
+    </p>
+    <p class="main-content">
+      관리자 ID/PW : <strong>admin / admin</strong>
+    </p>
+    <p class="main-content">
+      일반 사용자 ID/PW : <strong>user / user</strong>
+    </p><br/>
+
+
+    <a class="main-subject">요청 중 UI 비활성화</a>
+    <p class="main-content">
+      고정 확장자 체크박스 클릭 및 커스텀 확장자 "추가" 요청 처리 중에는 입력을 임시 비활성화하여 오류를 방지했습니다.
+    </p><br/>
+
+
+    <a class="main-subject">커스텀 확장자 중복 등록 방지</a>
+    <p class="main-content">
+      커스텀 확장자를 이미 등록한 상태에서 동일 확장자를 다시 추가하면 alert로 안내하고 등록을 제한했습니다.
+    </p><br/>
+
+    <a class="main-subject">커스텀 입력을 통한 고정 확장자 등록</a>
+    <p class="main-content">
+      커스텀 입력에서 고정 확장자 목록(bat, cmd 등)을 입력하면 체크박스 클릭과 동일한 동작을 수행하도록 처리했습니다.
+    </p>
+    <p class="main-content">
+      이미 고정 확장자가 체크된 경우에는 중복 등록으로 판단하여 alert로 안내했습니다.
+    </p>
+    <p class="main-content">
+      커스텀 확장자 등록 한도에 도달한 상태라도 고정 확장자 등록은 가능하도록 분리했습니다.
+    </p><br/>
+
+    <a class="main-subject">파일 업로드 화면 구현</a>
+    <p class="main-content">
+      실제 업로드(서버 저장)는 구현하지 않았습니다.
+    </p>
+    <p class="main-content">
+      파일 선택 시 DB 차단 확장자에 해당하면 파일 등록이 차단되는 것을 확인할 수 있습니다.
+    </p>
+
   </section>
 </body>
 </html>

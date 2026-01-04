@@ -1,0 +1,149 @@
+.page-title { 
+  margin: 0 0 10px; 
+  font-size: 20px; 
+  letter-spacing: -.2px; 
+}
+.page-desc { 
+  margin: 0 0 18px; 
+  color: var(--muted); 
+  line-height: 1.7; 
+}
+
+.section {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.60);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 14px;
+}
+.section h2 { 
+  margin: 0 0 8px; 
+  font-size: 16px; 
+}
+.section .hint { 
+  margin: 0 0 12px; 
+  color: var(--muted); 
+  font-size: 13px; 
+  line-height: 1.6; 
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px 12px;
+  align-items: center;
+}
+
+@media (max-width: 720px) {
+  .form-grid { 
+    grid-template-columns: 1fr; 
+  }
+}
+
+.lbl { 
+  font-weight: 700; 
+  color: var(--text); 
+}
+.inp, .ta {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.92);
+  color: var(--text);
+  outline: none;
+}
+.inp:focus, .ta:focus {
+  border-color: rgba(98,142,255,.45);
+  box-shadow: 0 0 0 3px rgba(98,142,255,.14);
+}
+.ta { 
+  min-height: 160px; 
+  resize: vertical; 
+}
+
+.row {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.btn.small {
+  padding: 10px 14px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.file-meta {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.file-list {
+  margin-top: 10px;
+  border: 1px dashed rgba(16,24,40,.16);
+  border-radius: 12px;
+  background: rgba(255,255,255,.55);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  text-align: left;
+  padding: 10px 12px;
+  background: rgba(16,24,40,.04);
+  color: rgba(16,24,40,.75);
+  border-bottom: 1px solid rgba(16,24,40,.08);
+}
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(16,24,40,.06);
+  vertical-align: middle;
+}
+tbody tr:last-child td { 
+  border-bottom:0; 
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(16,24,40,.12);
+  background: rgba(98,142,255,.10);
+  font-weight: 700;
+}
+
+.xbtn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(16,24,40,.60);
+  font-weight: 900;
+}
+.xbtn:hover { 
+  background: rgba(16,24,40,.08); 
+}
+
+.empty {
+  padding: 14px 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
