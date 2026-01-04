@@ -4,10 +4,14 @@ runtime: corretto11
 build:
   commands:
     pre-build:
+      - echo "📌 pwd=$(pwd)"
+      - echo "📌 ls -al"; ls -al
+      - echo "📌 java -version"; java -version
+      - echo "📌 gradlew exists?"; test -f gradlew || (echo "❌ gradlew not found in SourceDirectory(project)"; exit 1)
       - chmod +x gradlew
-      - ./gradlew --version
+      - echo "📌 ./gradlew --version"; ./gradlew --version
     build:
-      - ./gradlew clean bootJar -x test
+      - ./gradlew clean build -x test --stacktrace --info
 
 run:
   command: java -jar build/libs/app.jar
