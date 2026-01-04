@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.flow.project.mapper.ProjectMapper">
+
+  <!-- 조회 -->
+  <select id="findAllBlockedExtensions" 
+  resultType="com.flow.project.dto.BlockedExtensionsDTO">
+    select * from blocked_extensions
+  </select>
+
+  <select id="findUser" parameterType="java.util.Map" resultType="com.flow.project.dto.UsersDTO">
+    select * from users where id=#{id} and pwd=#{pwd}
+  </select>
+
+
+  <select id="findAllExtensions" resultType="String">
+    select name from blocked_extensions
+  </select>
+
+  <select id="findExtension" parameterType="String" resultType="int">
+    select count(*) from blocked_extensions where name=#{name}
+  </select>
+
+  <insert id="insertExtension" parameterType="String">
+    insert into blocked_extensions (name) values (#{name})
+  </insert>
+
+  <delete id="deleteExtension" parameterType="String">
+    delete from blocked_extensions where name=#{name}
+  </delete>
+
+
+</mapper>

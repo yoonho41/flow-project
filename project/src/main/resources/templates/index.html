@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default-layout}">
+<head>
+  <title layout:fragment="title">홈</title>
+</head>
+
+<body>
+  <section layout:fragment="content">
+    <h1>프로젝트 개요</h1>
+    <p style="color: rgba(16,24,40,.62); line-height: 1.7; margin-top: 8px;">
+      업로드 파일의 확장자를 정책에 따라 차단하는 기능을 구현하는 과제입니다.
+      현재는 화면 레이아웃을 먼저 구성한 상태이며, 기능은 이후 단계에서 추가할 예정입니다.
+    </p>
+    <p th:text="${session.loginUserName}">세션 사용자명</p>
+  </section>
+</body>
+</html>
