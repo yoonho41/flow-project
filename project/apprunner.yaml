@@ -5,8 +5,9 @@ build:
   commands:
     pre-build:
       - chmod +x gradlew
+      - ./gradlew --version
     build:
-      - ./gradlew clean bootJar
+      - ./gradlew clean bootJar -x test
 
 run:
   command: java -jar build/libs/app.jar
