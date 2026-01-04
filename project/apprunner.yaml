@@ -1,0 +1,14 @@
+version: 1.0
+runtime: corretto11
+
+build:
+  commands:
+    pre-build:
+      - chmod +x gradlew
+    build:
+      - ./gradlew clean bootJar
+
+run:
+  command: java -jar build/libs/app.jar
+  network:
+    port: 8080
